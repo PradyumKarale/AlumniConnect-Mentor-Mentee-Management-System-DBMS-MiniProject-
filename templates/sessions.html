@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Sessions</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+
+<!-- NAVBAR -->
+<nav class="navbar navbar-dark bg-dark">
+    <div class="container-fluid">
+        <span class="navbar-brand">Alumni Connect</span>
+
+        <div>
+            {% if role == 'student' %}
+            <a href="/student_dashboard" class="btn btn-outline-light me-2">Dashboard</a>
+            <a href="/sessions" class="btn btn-outline-light me-2">Sessions</a>
+            <a href="/logout" class="btn btn-danger">Logout</a>
+            {% elif role == 'alumni' %}
+            <a href="/alumni_dashboard" class="btn btn-outline-light me-2">Dashboard</a>
+            <a href="/sessions" class="btn btn-outline-light me-2">Sessions</a>
+            <a href="/logout" class="btn btn-danger">Logout</a>
+            {% endif %}
+        </div>
+    </div>
+</nav>
+
+<div class="container mt-4">
+    <h3 class="fw-bold">
+        {{ page_title }}
+    </h3>
+    <hr>
+</div>
+
+<div class="container mt-5">
+
+    <h2 class="text-center mb-4">Your Sessions</h2>
+
+    <!-- FLASH MESSAGES -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <script>
+    setTimeout(() => {
+       let alerts = document.querySelectorAll('.alert');
+       alerts.forEach(alert => alert.remove());
+    }, 3000);
+    </script>
+
+    {% if sessions %}
+    <div class="card shadow p-3">
+        <table class="table table-hover align-middle">
+            <thead class="table-dark">
+                <tr>
+                    <th>Session ID</th>
+                    <th>
+                     {% if role == 'student' %}
+                         Mentor
+                     {% else %}
+                         Student
+                     {% endif %}
+                    </th>
+                    <th>Date</th>
+                    <th>Time</th>
+                    <th>Feedback</th>
+                </tr>
+            </thead>
+
+            <tbody>
+            {% for s in sessions %}
+                <tr>
+                    <td>{{ s[0] }}</td>
+                    <td>{{ s[1] }}</td>
+                    <td>{{ s[2] }}</td>
+                    <td>{{ s[3] }}</td>
+
+                    <td>
+                     {% if s[4] %}
+                         <!-- Feedback already submitted -->
+                        <div>
+                             ⭐ <strong>{{ s[4] }}/5</strong><br>
+                             💬 {{ s[5] }}
+                        </div>
+                        <span class="badge bg-success mt-1">Submitted</span>
+
+                     {% else %}
+                         <!-- Show form -->
+                         <form method="POST" action="/submit_feedback" class="d-flex gap-2">
+
+                             <input type="hidden" name="session_id" value="{{ s[0] }}">
+
+                             <input type="number" name="rating" min="1" max="5"
+                                 class="form-control form-control-sm"
+                                 placeholder="⭐" required>
+
+                             <input type="text" name="comment"
+                                 class="form-control form-control-sm"
+                                 placeholder="Comment">
+
+                             <button class="btn btn-success btn-sm"
+                                 onclick="this.disabled=true; this.form.submit();">
+                                 Submit
+                             </button>
+
+                         </form>
+                     {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+
+        </table>
+    </div>
+    {% else %}
+        <p class="text-center text-muted">No sessions available</p>
+    {% endif %}
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>
